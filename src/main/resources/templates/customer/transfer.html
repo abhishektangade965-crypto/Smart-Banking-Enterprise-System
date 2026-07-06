@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{common/layout :: head-resources}">
+</head>
+<body>
+<div th:replace="~{common/layout :: layout(~{::content}, 'Fund Transfer')}">
+<th:block th:fragment="content">
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="form-card">
+            <h6 style="font-weight:700;margin-bottom:1.5rem;"><i class="fas fa-paper-plane me-2 text-primary"></i>Initiate Fund Transfer</h6>
+            
+            <div th:if="${error}" class="alert alert-danger py-2 mb-3" style="font-size:.82rem; border-radius:10px; border:none; background:rgba(239,68,68,0.1); color:#ef4444;"><i class="fas fa-exclamation-circle me-1"></i><span th:text="${error}"></span></div>
+            <div th:if="${success}" class="alert alert-success py-2 mb-3" style="font-size:.82rem; border-radius:10px; border:none; background:rgba(16,185,129,0.1); color:#10b981;"><i class="fas fa-check-circle me-1"></i><span th:text="${success}"></span></div>
+            
+            <form id="transferForm" th:action="@{/customer/transfer}" method="post" th:object="${transferDto}">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf != null}"/>
+                
+                <input type="hidden" id="hiddenPin" th:field="*{transactionPin}"/>
+                <input type="hidden" id="hiddenOtp" th:field="*{otp}"/>
+
+                <div class="mb-3">
+                    <label class="form-label">From Account Ledger</label>
+                    <select th:field="*{fromAccount}" class="form-select" required>
+                        <option value="">Select source account</option>
+                        <option th:each="a : ${accounts}" th:value="${a.accountNumber}"
+                                th:text="${a.accountType + ' - ' + #strings.substring(a.accountNumber,0,8) + '... (₹' + #numbers.formatDecimal(a.balance,0,'COMMA',2,'POINT') + ')'}"></option>
+                    </select>
+                    <div class="text-danger" style="font-size:.75rem;" th:errors="*{fromAccount}"></div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Transfer Channel Strategy</label>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <input type="radio" class="btn-check" name="transferType" id="neft" value="NEFT" checked/>
+                        <label class="btn btn-premium-outline px-3 py-2" for="neft" style="border-radius:10px;font-size:.8rem; border: 1.5px solid var(--border-color); color: var(--text-main); font-weight:700;">NEFT</label>
+                        
+                        <input type="radio" class="btn-check" name="transferType" id="rtgs" value="RTGS"/>
+                        <label class="btn btn-premium-outline px-3 py-2" for="rtgs" style="border-radius:10px;font-size:.8rem; border: 1.5px solid var(--border-color); color: var(--text-main); font-weight:700;">RTGS</label>
+                        
+                        <input type="radio" class="btn-check" name="transferType" id="imps" value="IMPS"/>
+                        <label class="btn btn-premium-outline px-3 py-2" for="imps" style="border-radius:10px;font-size:.8rem; border: 1.5px solid var(--border-color); color: var(--text-main); font-weight:700;">IMPS</label>
+                        
+                        <input type="radio" class="btn-check" name="transferType" id="upi" value="UPI"/>
+                        <label class="btn btn-premium-outline px-3 py-2" for="upi" style="border-radius:10px;font-size:.8rem; border: 1.5px solid var(--border-color); color: var(--text-main); font-weight:700;">UPI</label>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">To Account Number / UPI ID</label>
+                    <input type="text" th:field="*{toAccount}" class="form-control" placeholder="Enter target account number or UPI address" required/>
+                    <div class="text-danger" style="font-size:.75rem;" th:errors="*{toAccount}"></div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Transfer Amount (₹)</label>
+                    <div class="input-group">
+                        <span class="input-group-text" style="background:rgba(255,255,255,0.6);border:1.5px solid var(--border-color);border-right:none;border-radius:10px 0 0 10px;font-weight:700; color:var(--text-main);">₹</span>
+                        <input type="number" th:field="*{amount}" class="form-control" placeholder="0.00" min="1" step="0.01" required style="border-left:none;border-radius:0 10px 10px 0;"/>
+                    </div>
+                    <div class="text-danger" style="font-size:.75rem;" th:errors="*{amount}"></div>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="form-label">Transactional Remarks (optional)</label>
+                    <input type="text" th:field="*{remarks}" class="form-control" placeholder="e.g. Rent payment"/>
+                </div>
+                
+                <button type="submit" class="btn btn-primary-custom w-100 py-2">
+                    <i class="fas fa-paper-plane me-2"></i>Initiate Transfer
+                </button>
+            </form>
+
+            <!-- Verification Modal -->
+            <div class="modal fade" id="verificationModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
+                    <div class="modal-content cmd-modal">
+                        <div class="modal-header border-0 pb-0">
+                            <h6 class="modal-title fw-800 text-dark" style="color:var(--text-main) !important;"><i class="fas fa-shield-alt text-primary me-2"></i>Security Verification</h6>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="text-muted small" style="margin-bottom: 1.5rem;">Please authorize this transfer using your secure transaction credentials.</p>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Transaction PIN</label>
+                                <input type="password" id="modalPin" class="form-control" maxlength="4" placeholder="Enter 4-digit PIN" required/>
+                                <small class="text-muted" style="font-size: .7rem;">Default PIN: 1234</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">SMS One-Time Password (OTP)</label>
+                                <div class="input-group">
+                                    <input type="text" id="modalOtp" class="form-control" maxlength="6" placeholder="6-digit code" required/>
+                                    <button class="btn btn-premium-outline" type="button" id="btnSendOtp" style="border-radius: 0 10px 10px 0; font-size: .78rem; font-weight: 700; border:1.5px solid var(--border-color); color:var(--text-main);">Get OTP</button>
+                                </div>
+                                <small class="text-muted" style="font-size: .7rem;">Test OTP: 123456</small>
+                            </div>
+                            
+                            <div id="otpAlert" class="alert alert-success py-2 d-none" style="font-size: .75rem; border-radius: 8px;">
+                                <i class="fas fa-info-circle me-1"></i> OTP generated! Use <strong>123456</strong> for testing.
+                            </div>
+                        </div>
+                        <div class="modal-footer border-0 pt-0">
+                            <button type="button" class="btn btn-premium-outline btn-sm" data-bs-dismiss="modal" style="border-radius: 10px; border:1.5px solid var(--border-color); color:var(--text-main); font-weight:700;">Cancel</button>
+                            <button type="button" id="btnConfirmSubmit" class="btn btn-primary-custom btn-sm" style="border-radius: 10px;">Verify & Submit</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                document.addEventListener("DOMContentLoaded", function() {
+                    const form = document.getElementById('transferForm');
+                    const modal = new bootstrap.Modal(document.getElementById('verificationModal'));
+                    const btnSendOtp = document.getElementById('btnSendOtp');
+                    const otpAlert = document.getElementById('otpAlert');
+                    const btnConfirmSubmit = document.getElementById('btnConfirmSubmit');
+
+                    form.addEventListener('submit', function(e) {
+                        const pin = document.getElementById('hiddenPin').value;
+                        const otp = document.getElementById('hiddenOtp').value;
+                        
+                        if (!pin || !otp) {
+                            e.preventDefault();
+                            modal.show();
+                        }
+                    });
+
+                    btnSendOtp.addEventListener('click', function() {
+                        otpAlert.classList.remove('d-none');
+                        btnSendOtp.innerText = "Resend";
+                    });
+
+                    btnConfirmSubmit.addEventListener('click', function() {
+                        const pinVal = document.getElementById('modalPin').value;
+                        const otpVal = document.getElementById('modalOtp').value;
+
+                        if (!pinVal || pinVal.length !== 4) {
+                            alert("Please enter a valid 4-digit PIN");
+                            return;
+                        }
+                        if (!otpVal || otpVal.length !== 6) {
+                            alert("Please enter a valid 6-digit OTP");
+                            return;
+                        }
+
+                        document.getElementById('hiddenPin').value = pinVal;
+                        document.getElementById('hiddenOtp').value = otpVal;
+                        modal.hide();
+                        form.submit();
+                    });
+                });
+            </script>
+        </div>
+    </div>
+    
+    <!-- Beneficiaries List -->
+    <div class="col-lg-5">
+        <div class="data-table-card">
+            <div class="card-header-custom"><h6><i class="fas fa-address-book me-2 text-primary"></i>Saved Beneficiaries</h6></div>
+            <div class="p-4">
+                <div th:each="b : ${beneficiaries}" style="display:flex;align-items:center;gap:.8rem;padding:.75rem;border-radius:10px;border:1px solid var(--border-color);margin-bottom:.6rem;cursor:pointer; transition:all 0.2s;"
+                     th:onclick="'document.querySelector(\'[name=toAccount]\').value=\'' + ${b.accountNumber} + '\''">
+                    <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:.85rem;flex-shrink:0;" th:text="${#strings.substring(b.beneficiaryName,0,1).toUpperCase()}"></div>
+                    <div>
+                        <div style="font-size:.85rem;font-weight:700;" th:text="${b.beneficiaryName}"></div>
+                        <div style="font-size:.72rem;color:var(--text-muted);" th:text="${b.bankName + ' • ' + #strings.substring(b.accountNumber,0,6) + '...'}"></div>
+                    </div>
+                    <div style="margin-left:auto;font-size:.68rem;background:rgba(16, 185, 129, 0.1);color:#10b981;padding:.2rem .5rem;border-radius:6px; font-weight:700;" th:if="${b.verified}">Verified</div>
+                </div>
+                <div th:if="${beneficiaries == null or beneficiaries.empty}" style="text-align:center;padding:2rem;color:var(--text-muted);font-size:.85rem;">
+                    <i class="fas fa-address-book text-muted mb-2" style="font-size:2rem;display:block;"></i>
+                    No beneficiaries registered yet
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</th:block>
+</div>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{common/layout :: head-resources}">
+</head>
+<body>
+<div th:replace="~{common/layout :: layout(~{::content}, 'Card Management')}">
+<th:block th:fragment="content">
+<div class="row g-4">
+    <!-- Request Card Form -->
+    <div class="col-lg-5">
+        <div class="form-card">
+            <h6 style="font-weight:700;margin-bottom:1.5rem;"><i class="fas fa-credit-card me-2 text-primary"></i>Request New Card</h6>
+            <form th:action="@{/customer/cards/request}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf != null}"/>
+                
+                <div class="mb-3">
+                    <label class="form-label">Linked Account</label>
+                    <select name="accountId" class="form-select" required>
+                        <option value="">Select linked account</option>
+                        <option th:each="a : ${accounts}" th:value="${a.id}" th:text="${a.accountType + ' - ' + #strings.substring(a.accountNumber,0,8) + '...'}"></option>
+                    </select>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="form-label">Card Scheme / Type</label>
+                    <div class="d-flex gap-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="cardType" value="DEBIT" id="debit" checked/>
+                            <label class="form-check-label fw-bold text-sm" for="debit">Debit Card</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="cardType" value="CREDIT" id="credit"/>
+                            <label class="form-check-label fw-bold text-sm" for="credit">Credit Card</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary-custom w-100">Submit Request</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Cards Preview Grid -->
+    <div class="col-lg-7">
+        <div class="row g-3" th:if="${cards != null and not #lists.isEmpty(cards)}">
+            <div class="col-12" th:each="c : ${cards}">
+                <div style="background: linear-gradient(135deg, var(--primary) 0%, #1e1b4b 60%, var(--secondary) 100%); border-radius: 20px; padding: 1.8rem; color: #fff; position: relative; overflow: hidden; box-shadow: 0 15px 35px rgba(79, 70, 229, 0.2);">
+                    <div style="position:absolute;top:-40px;right:-40px;width:150px;height:150px;border-radius:50%;background:rgba(255,255,255,.05); pointer-events: none;"></div>
+                    <div style="position:absolute;bottom:-80px;left:20px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.03); pointer-events: none;"></div>
+                    
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem; position:relative; z-index:1;">
+                        <div>
+                            <div style="font-size:.7rem;opacity:.85;text-transform:uppercase;letter-spacing:1.5px; font-weight: 700;" th:text="${c.cardType} + ' CARD'">DEBIT CARD</div>
+                            <div style="font-size:1.15rem;font-weight:800;margin-top:.2rem; letter-spacing: -0.5px;">SmartBank</div>
+                        </div>
+                        <div style="font-size:1.6rem;opacity:.7;"><i class="fas fa-credit-card"></i></div>
+                    </div>
+                    
+                    <div style="font-size:1.25rem;font-family:monospace;letter-spacing:.2rem;margin-bottom:1.5rem; position:relative; z-index:1;" th:text="${#strings.substring(c.cardNumber,0,4) + ' **** **** ' + #strings.substring(c.cardNumber,12)}"></div>
+                    
+                    <div style="display:flex;justify-content:space-between;align-items:center; position:relative; z-index:1;">
+                        <div>
+                            <div style="font-size:.62rem;opacity:.75; letter-spacing: 0.5px; font-weight:700;">VALID THRU</div>
+                            <div style="font-size:.88rem;font-weight:700;" th:text="${#temporals.format(c.expiryDate,'MM/yy')}">09/28</div>
+                        </div>
+                        <span class="badge-status badge-active" th:text="${c.status}" style="background:rgba(255,255,255,0.2); color:#fff; border:none; border-radius:8px;">ACTIVE</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- EMPTY STATE -->
+        <div class="data-table-card p-5 text-center d-flex flex-column align-items-center justify-content-center" style="min-height: 250px;" th:if="${cards == null or #lists.isEmpty(cards)}">
+            <i class="fas fa-credit-card text-muted mb-3" style="font-size:3rem;"></i>
+            <h6 class="fw-bold mb-2">No Active Cards Found</h6>
+            <p class="text-muted small">You haven't requested any debit or credit card strategies for your ledger accounts yet.</p>
+        </div>
+    </div>
+</div>
+</th:block>
+</div>
+</body>
+</html>

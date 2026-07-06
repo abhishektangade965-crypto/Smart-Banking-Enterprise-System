@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{common/layout :: head-resources}">
+</head>
+<body>
+<div th:replace="~{common/layout :: layout(~{::content}, 'Employee Dashboard')}">
+<th:block th:fragment="content">
+<div class="row g-4 mb-4">
+    <div class="col-md-6">
+        <div class="stat-card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span class="stat-label">Pending KYC Verifications</span>
+                <div class="stat-icon"><i class="fas fa-id-card text-danger"></i></div>
+            </div>
+            <div class="stat-value text-danger" th:text="${pendingKyc}">0</div>
+            <div style="font-size:0.7rem; color:var(--text-muted); font-weight:700;"><i class="fas fa-hourglass-half me-1"></i>Awaiting profile review</div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="stat-card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span class="stat-label">Pending Loan Applications</span>
+                <div class="stat-icon"><i class="fas fa-file-alt text-warning"></i></div>
+            </div>
+            <div class="stat-value text-warning" th:text="${pendingLoans}">0</div>
+            <div style="font-size:0.7rem; color:var(--text-muted); font-weight:700;"><i class="fas fa-clock me-1"></i>Awaiting EMI validation</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Operations Quick Actions -->
+    <div class="col-md-6">
+        <div class="data-table-card h-100">
+            <div class="card-header-custom"><h6><i class="fas fa-bolt me-2 text-warning"></i>Operational Actions</h6></div>
+            <div class="p-4 d-grid gap-2">
+                <a th:href="@{/employee/kyc}" class="btn btn-primary-custom text-start"><i class="fas fa-id-card me-2"></i>Process KYC Verifications</a>
+                <a th:href="@{/employee/loans}" class="btn btn-premium-outline text-start" style="border-radius:10px;font-size:.85rem;font-weight:700;border:1.5px solid var(--border-color);color:var(--text-main);"><i class="fas fa-file-alt me-2 text-warning"></i>Review Loan Applications</a>
+            </div>
+        </div>
+    </div>
+    <!-- Tasks & Targets Widget -->
+    <div class="col-md-6">
+        <div class="data-table-card h-100">
+            <div class="card-header-custom"><h6><i class="fas fa-tasks me-2 text-primary"></i>Today's Operational Targets</h6></div>
+            <div class="p-4">
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1" style="font-size:0.78rem; font-weight:700;">
+                        <span>KYC Auditing Target</span>
+                        <span>80% complete</span>
+                    </div>
+                    <div class="progress" style="height: 6px; border-radius:10px;">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: 80%; border-radius:10px;"></div>
+                    </div>
+                </div>
+                <div class="mb-0">
+                    <div class="d-flex justify-content-between mb-1" style="font-size:0.78rem; font-weight:700;">
+                        <span>Loan Verification SLA</span>
+                        <span>4 / 5 processed</span>
+                    </div>
+                    <div class="progress" style="height: 6px; border-radius:10px;">
+                        <div class="progress-bar bg-primary" role="progressbar" style="width: 80%; border-radius:10px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Performance Overview -->
+    <div class="col-12">
+        <div class="data-table-card">
+            <div class="card-header-custom"><h6><i class="fas fa-chart-line me-2 text-primary"></i>Operational Performance Analytics</h6></div>
+            <div class="p-4">
+                <div class="row text-center g-3">
+                    <div class="col-md-3">
+                        <h4 class="fw-bold mb-1">99.2%</h4>
+                        <span class="text-muted small">SLA compliance rate</span>
+                    </div>
+                    <div class="col-md-3">
+                        <h4 class="fw-bold mb-1">2.4 mins</h4>
+                        <span class="text-muted small">Average validation time</span>
+                    </div>
+                    <div class="col-md-3">
+                        <h4 class="fw-bold mb-1">45</h4>
+                        <span class="text-muted small">Accounts verified today</span>
+                    </div>
+                    <div class="col-md-3">
+                        <h4 class="fw-bold mb-1">98%</h4>
+                        <span class="text-muted small">Quality check rate</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</th:block>
+</div>
+</body>
+</html>

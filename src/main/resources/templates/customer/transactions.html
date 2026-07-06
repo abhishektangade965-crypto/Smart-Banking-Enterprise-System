@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{common/layout :: head-resources}">
+</head>
+<body>
+<div th:replace="~{common/layout :: layout(~{::content}, 'Transaction History')}">
+<th:block th:fragment="content">
+
+  <!-- Account selector + Export buttons -->
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+
+    <!-- Account selector -->
+    <form method="get" action="/customer/transactions" class="d-flex align-items-center gap-2">
+      <label for="accountSelect" class="form-label mb-0 fw-700 text-sm" style="font-size:0.8rem;">Active Ledger:</label>
+      <select id="accountSelect" name="accountNumber" class="form-select form-select-sm"
+              style="min-width:240px; border-radius:10px;" onchange="this.form.submit()">
+        <option th:each="a : ${accounts}"
+                th:value="${a.accountNumber}"
+                th:text="${a.accountNumber + ' (' + a.accountType + ')'}"
+                th:selected="${selectedAccount != null and selectedAccount.accountNumber == a.accountNumber}">
+        </option>
+      </select>
+    </form>
+
+    <!-- Export buttons -->
+    <div class="d-flex gap-2">
+      <a th:href="@{/customer/transactions/export/pdf(accountNumber=${selectedAccount != null ? selectedAccount.accountNumber : ''})}"
+         class="btn btn-premium-outline btn-sm d-flex align-items-center gap-2"
+         style="color: var(--danger); border-color: rgba(239, 68, 68, 0.2); background: rgba(239, 68, 68, 0.05); border-radius: 10px; font-weight:700;"
+         title="Download PDF Statement">
+        <i class="fas fa-file-pdf"></i> Export PDF
+      </a>
+      <a th:href="@{/customer/transactions/export/csv(accountNumber=${selectedAccount != null ? selectedAccount.accountNumber : ''})}"
+         class="btn btn-premium-outline btn-sm d-flex align-items-center gap-2"
+         style="color: var(--success); border-color: rgba(16, 185, 129, 0.2); background: rgba(16, 185, 129, 0.05); border-radius: 10px; font-weight:700;"
+         title="Download CSV Statement">
+        <i class="fas fa-file-csv"></i> Export CSV
+      </a>
+      <a th:href="@{/customer/transactions/export/excel(accountNumber=${selectedAccount != null ? selectedAccount.accountNumber : ''})}"
+         class="btn btn-premium btn-sm d-flex align-items-center gap-2"
+         style="border-radius: 10px;"
+         title="Download Excel Statement">
+        <i class="fas fa-file-excel"></i> Export Excel
+      </a>
+    </div>
+  </div>
+
+  <!-- Transactions table -->
+  <div class="data-table-card">
+    <div class="card-header-custom">
+      <h6><i class="fas fa-list-alt me-2 text-primary"></i>Ledger Statement Logs
+        <span th:if="${selectedAccount != null}"
+              class="text-muted fw-normal ms-2"
+              style="font-size:.8rem;"
+              th:text="'— ' + ${selectedAccount.accountNumber}"></span>
+      </h6>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th>Txn ID</th>
+            <th>Type</th>
+            <th>Amount</th>
+            <th>Ledger Balance After</th>
+            <th>Status</th>
+            <th>Date & Time</th>
+            <th>Remarks</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="t : ${transactions}">
+            <td><code style="font-size:.72rem;" th:text="${t.transactionId}"></code></td>
+            <td><span style="font-size:.72rem;background:var(--primary-glow);color:var(--primary);padding:.25rem .5rem;border-radius:6px;font-weight:700;" th:text="${t.transactionType}"></span></td>
+            <td>
+              <span class="text-success fw-bold" th:if="${t.receiverAccount != null and selectedAccount != null and t.receiverAccount.accountNumber == selectedAccount.accountNumber}">
+                +&#x20B9;<span th:text="${#numbers.formatDecimal(t.amount,0,'COMMA',2,'POINT')}"></span>
+              </span>
+              <span class="text-danger fw-bold" th:if="${t.senderAccount != null and selectedAccount != null and t.senderAccount.accountNumber == selectedAccount.accountNumber}">
+                -&#x20B9;<span th:text="${#numbers.formatDecimal(t.amount,0,'COMMA',2,'POINT')}"></span>
+              </span>
+            </td>
+            <td>
+              &#x20B9;<span th:text="${t.receiverAccount != null and selectedAccount != null and t.receiverAccount.accountNumber == selectedAccount.accountNumber ? (t.receiverBalanceAfter != null ? #numbers.formatDecimal(t.receiverBalanceAfter,0,'COMMA',2,'POINT') : '-') : (t.senderBalanceAfter != null ? #numbers.formatDecimal(t.senderBalanceAfter,0,'COMMA',2,'POINT') : '-')}"></span>
+            </td>
+            <td>
+              <span class="badge-status badge-active"    th:if="${t.status.name() == 'SUCCESS'}">Success</span>
+              <span class="badge-status badge-pending"   th:if="${t.status.name() == 'PENDING'}">Pending</span>
+              <span class="badge-status badge-rejected"  th:if="${t.status.name() == 'FAILED'}">Failed</span>
+            </td>
+            <td style="font-size:.78rem;color:var(--text-muted);" th:text="${#temporals.format(t.transactionDate,'dd MMM yyyy HH:mm')}"></td>
+            <td style="font-size:.8rem;color:var(--text-muted);" th:text="${t.remarks}"></td>
+          </tr>
+          
+          <!-- EMPTY STATE FOR TABLE -->
+          <tr th:if="${transactions == null or transactions.empty}">
+            <td colspan="7" class="text-center py-5">
+              <div class="d-flex flex-column align-items-center justify-content-center py-4">
+                <i class="fas fa-list-alt text-muted mb-3" style="font-size: 3rem;"></i>
+                <h6 class="fw-bold text-muted">No Ledger Transactions Found</h6>
+                <p class="text-muted small mb-4" style="max-width: 320px;">No transfers, deposits, or withdrawals have been registered on this account ledger yet.</p>
+                <a th:href="@{/customer/transfer}" class="btn btn-primary-custom btn-sm"><i class="fas fa-paper-plane me-2"></i>Initiate First Transfer</a>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</th:block>
+</div>
+</body>
+</html>

@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{common/layout :: head-resources}"></head>
+<body>
+<div th:replace="~{common/layout :: layout(~{::content}, 'Admin Dashboard')}">
+<th:block th:fragment="content">
+
+<!-- ── Top KPI Cards ── -->
+<div class="row g-4 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span class="stat-label">Total Customers</span>
+                <div class="stat-icon"><i class="fas fa-users text-primary"></i></div>
+            </div>
+            <div class="stat-value text-primary" th:text="${stats.totalCustomers}">0</div>
+            <div style="font-size:0.7rem; color:var(--success); font-weight:700;"><i class="fas fa-arrow-up me-1"></i>+4.2% from last week</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span class="stat-label">Total Accounts</span>
+                <div class="stat-icon"><i class="fas fa-university text-secondary"></i></div>
+            </div>
+            <div class="stat-value text-secondary" th:text="${stats.totalAccounts}">0</div>
+            <div style="font-size:0.7rem; color:var(--success); font-weight:700;"><i class="fas fa-arrow-up me-1"></i>+12.8% active savings</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span class="stat-label">Total Transactions</span>
+                <div class="stat-icon"><i class="fas fa-exchange-alt text-success"></i></div>
+            </div>
+            <div class="stat-value text-success" th:text="${stats.totalTransactions}">0</div>
+            <div style="font-size:0.7rem; color:var(--success); font-weight:700;"><i class="fas fa-bolt me-1"></i>Instant settlement</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span class="stat-label">Total Loans Portfolio</span>
+                <div class="stat-icon"><i class="fas fa-hand-holding-usd text-warning"></i></div>
+            </div>
+            <div class="stat-value text-warning" th:text="${stats.totalLoans}">0</div>
+            <div style="font-size:0.7rem; color:var(--success); font-weight:700;"><i class="fas fa-arrow-up me-1"></i>+8.4% growth vs last week</div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Secondary Stats ── -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="d-flex align-items-center gap-3">
+                <div style="width:40px;height:40px;border-radius:8px;background:rgba(79,70,229,0.08);display:flex;align-items:center;justify-content:center;color:var(--primary);font-size:1rem;"><i class="fas fa-user-tie"></i></div>
+                <div>
+                    <div style="font-size:1.15rem;font-weight:800;color:var(--text-main);" th:text="${stats.totalEmployees}">0</div>
+                    <div style="font-size:.72rem;color:var(--text-muted);font-weight:600;">Total Employees</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="d-flex align-items-center gap-3">
+                <div style="width:40px;height:40px;border-radius:8px;background:rgba(14,165,233,0.08);display:flex;align-items:center;justify-content:center;color:var(--secondary);font-size:1rem;"><i class="fas fa-building"></i></div>
+                <div>
+                    <div style="font-size:1.15rem;font-weight:800;color:var(--text-main);" th:text="${stats.totalBranches}">0</div>
+                    <div style="font-size:.72rem;color:var(--text-muted);font-weight:600;">Active Branches</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="d-flex align-items-center gap-3">
+                <div style="width:40px;height:40px;border-radius:8px;background:rgba(245,158,11,0.08);display:flex;align-items:center;justify-content:center;color:var(--warning);font-size:1rem;"><i class="fas fa-rupee-sign"></i></div>
+                <div>
+                    <div style="font-size:1rem;font-weight:800;color:var(--text-main);">&#x20B9;<span th:text="${#numbers.formatDecimal(stats.totalDeposits, 0, 'COMMA', 2, 'POINT')}">0</span></div>
+                    <div style="font-size:.72rem;color:var(--text-muted);font-weight:600;">Total Deposits</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="d-flex align-items-center gap-3">
+                <div style="width:40px;height:40px;border-radius:8px;background:rgba(239,68,68,0.08);display:flex;align-items:center;justify-content:center;color:var(--danger);font-size:1rem;"><i class="fas fa-id-card"></i></div>
+                <div>
+                    <div style="font-size:1.15rem;font-weight:800;color:var(--text-main);" th:text="${pendingKyc}">0</div>
+                    <div style="font-size:.72rem;color:var(--text-muted);font-weight:600;">Pending KYC Queue</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Charts + Quick Actions ── -->
+<div class="row g-4 mb-4">
+    <!-- Transaction Chart -->
+    <div class="col-lg-8">
+        <div class="data-table-card">
+            <div class="card-header-custom">
+                <h6><i class="fas fa-chart-bar me-2 text-primary"></i>Transaction Volume — Last 7 Days</h6>
+                <span style="font-size:.75rem;color:var(--text-muted);font-weight:600;" th:text="'Today: ' + ${stats.todayTransactions} + ' txns'"></span>
+            </div>
+            <div class="p-4">
+                <div style="height: 220px; position: relative;">
+                    <canvas id="txnChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Quick Actions -->
+    <div class="col-lg-4">
+        <div class="data-table-card h-100">
+            <div class="card-header-custom"><h6><i class="fas fa-bolt me-2 text-warning"></i>Quick Actions</h6></div>
+            <div class="p-4">
+                <div class="d-grid gap-2">
+                    <a th:href="@{/admin/customers}" class="btn btn-primary-custom text-start"><i class="fas fa-user-plus me-2"></i>Manage Customers</a>
+                    <a th:href="@{/admin/accounts}" class="btn btn-premium-outline text-start" style="border-radius:10px;font-size:.85rem;font-weight:700;border:1.5px solid var(--border-color);color:var(--text-main);"><i class="fas fa-university me-2 text-primary"></i>Manage Accounts</a>
+                    <a th:href="@{/admin/loans}" class="btn btn-premium-outline text-start" style="border-radius:10px;font-size:.85rem;font-weight:700;border:1.5px solid var(--border-color);color:var(--text-main);"><i class="fas fa-file-alt me-2 text-warning"></i>Pending Loans <span class="badge bg-warning text-dark ms-1" th:text="${stats.pendingLoans}"></span></a>
+                    <a th:href="@{/admin/employees}" class="btn btn-premium-outline text-start" style="border-radius:10px;font-size:.85rem;font-weight:700;border:1.5px solid var(--border-color);color:var(--text-main);"><i class="fas fa-user-tie me-2 text-success"></i>Manage Employees</a>
+                    <a th:href="@{/admin/branches}" class="btn btn-premium-outline text-start" style="border-radius:10px;font-size:.85rem;font-weight:700;border:1.5px solid var(--border-color);color:var(--text-main);"><i class="fas fa-building me-2 text-secondary"></i>Manage Branches</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Recent Transactions + Loan Status Breakdown ── -->
+<div class="row g-4 mb-4">
+    <!-- Recent Transactions -->
+    <div class="col-lg-7">
+        <div class="data-table-card">
+            <div class="card-header-custom">
+                <h6><i class="fas fa-history me-2 text-primary"></i>Recent Transactions</h6>
+                <a th:href="@{/admin/transactions}" style="font-size:.78rem;color:var(--primary);text-decoration:none;font-weight:700;">View All →</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead><tr><th>Txn ID</th><th>Type</th><th>Amount</th><th>Date</th><th>Status</th></tr></thead>
+                    <tbody>
+                    <tr th:each="t : ${recentTransactions}">
+                        <td><code style="font-size:.75rem;" th:text="${t.transactionId}"></code></td>
+                        <td><span style="font-size:.72rem;background:var(--primary-glow);color:var(--primary);padding:.2rem .5rem;border-radius:6px;font-weight:700;" th:text="${t.transactionType}"></span></td>
+                        <td><strong>&#x20B9;<span th:text="${#numbers.formatDecimal(t.amount,0,'COMMA',2,'POINT')}"></span></strong></td>
+                        <td style="font-size:.78rem;color:var(--text-muted);" th:text="${#temporals.format(t.transactionDate,'dd MMM, HH:mm')}"></td>
+                        <td><span class="badge-status badge-active" th:if="${t.status.name()=='SUCCESS'}">Success</span>
+                            <span class="badge-status badge-rejected" th:if="${t.status.name()=='FAILED'}">Failed</span>
+                            <span class="badge-status badge-pending" th:if="${t.status.name()=='PENDING'}">Pending</span></td>
+                    </tr>
+                    <tr th:if="${recentTransactions.empty}"><td colspan="5" class="text-center py-4 text-muted">No transactions yet</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loan Status Breakdown -->
+    <div class="col-lg-5">
+        <div class="data-table-card">
+            <div class="card-header-custom">
+                <h6><i class="fas fa-chart-pie me-2 text-primary"></i>Loan Status Overview</h6>
+            </div>
+            <div class="p-3">
+                <div style="height: 200px; position: relative;">
+                    <canvas id="loanChart"></canvas>
+                </div>
+            </div>
+            <div class="px-3 pb-3">
+                <div class="row g-1 text-center">
+                    <div class="col-3">
+                        <div style="font-size:1.1rem;font-weight:800;color:var(--warning);" th:text="${loanStats.pending}">0</div>
+                        <div style="font-size:.65rem;color:var(--text-muted);font-weight:600;">Pending</div>
+                    </div>
+                    <div class="col-3">
+                        <div style="font-size:1.1rem;font-weight:800;color:var(--success);" th:text="${loanStats.approved}">0</div>
+                        <div style="font-size:.65rem;color:var(--text-muted);font-weight:600;">Approved</div>
+                    </div>
+                    <div class="col-3">
+                        <div style="font-size:1.1rem;font-weight:800;color:var(--danger);" th:text="${loanStats.rejected}">0</div>
+                        <div style="font-size:.65rem;color:var(--text-muted);font-weight:600;">Rejected</div>
+                    </div>
+                    <div class="col-3">
+                        <div style="font-size:1.1rem;font-weight:800;color:var(--primary);" th:text="${loanStats.active}">0</div>
+                        <div style="font-size:.65rem;color:var(--text-muted);font-weight:600;">Active</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── SYSTEM STATUS MONITOR MATRIX (Admin Module Additions) ── -->
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="data-table-card">
+            <div class="card-header-custom">
+                <h6><i class="fas fa-heartbeat me-2 text-success"></i>System Health & Node Monitors</h6>
+                <span class="badge bg-success bg-opacity-10 text-success py-1 px-2" style="font-size:0.68rem; font-weight:700;">ALL NODES OPERATIONAL</span>
+            </div>
+            <div class="p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3" style="font-size:0.85rem;">
+                    <span><i class="fas fa-microchip me-2 text-primary"></i> CPU Load</span>
+                    <span class="fw-bold">14.2%</span>
+                </div>
+                <div class="progress mb-4" style="height: 6px; border-radius:10px;">
+                    <div class="progress-bar bg-primary" role="progressbar" style="width: 14%; border-radius:10px;"></div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-3" style="font-size:0.85rem;">
+                    <span><i class="fas fa-memory me-2 text-secondary"></i> Heap Memory Utilisation</span>
+                    <span class="fw-bold">428MB / 1024MB</span>
+                </div>
+                <div class="progress mb-4" style="height: 6px; border-radius:10px;">
+                    <div class="progress-bar bg-secondary" role="progressbar" style="width: 42%; border-radius:10px;"></div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-3" style="font-size:0.85rem;">
+                    <span><i class="fas fa-database me-2 text-info"></i> Connection Pool Available</span>
+                    <span class="fw-bold">18 / 20</span>
+                </div>
+                <div class="progress" style="height: 6px; border-radius:10px;">
+                    <div class="progress-bar bg-info" role="progressbar" style="width: 90%; border-radius:10px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="data-table-card">
+            <div class="card-header-custom">
+                <h6><i class="fas fa-flag me-2 text-primary"></i>Feature Flags & Configurations</h6>
+            </div>
+            <div class="p-4">
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" role="switch" id="ff1" checked disabled>
+                    <label class="form-check-label fw-bold small" for="ff1">Secure Double-Entry Auditing Layer (Active)</label>
+                </div>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" role="switch" id="ff2" checked disabled>
+                    <label class="form-check-label fw-bold small" for="ff2">JPA Optimistic Lock Guards (Active)</label>
+                </div>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" role="switch" id="ff3" checked disabled>
+                    <label class="form-check-label fw-bold small" for="ff3">Strict PII Database transient CVV masking (Active)</label>
+                </div>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" id="ff4" disabled>
+                    <label class="form-check-label fw-bold small" for="ff4">Beta Investment Portfolios (Inactive)</label>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+/*<![CDATA[*/
+document.addEventListener("DOMContentLoaded", function() {
+    // ── Transaction bar chart ──
+    const txnLabels = /*[[${txnChartLabels}]]*/ ['Day1'];
+    const txnData   = /*[[${txnChartData}]]*/ [0];
+    new Chart(document.getElementById('txnChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: txnLabels,
+            datasets: [{
+                label: 'Transactions',
+                data: txnData,
+                backgroundColor: 'rgba(79, 70, 229, 0.25)',
+                hoverBackgroundColor: '#4f46e5',
+                borderColor: '#4f46e5',
+                borderWidth: 2,
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    enabled: true,
+                    backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                    titleFont: { family: 'Plus Jakarta Sans', weight: '700', size: 12 },
+                    bodyFont: { family: 'Plus Jakarta Sans', size: 12 },
+                    padding: 10,
+                    cornerRadius: 8,
+                    borderColor: 'rgba(255,255,255,0.1)',
+                    borderWidth: 1,
+                    callbacks: {
+                        label: function(context) {
+                            return ' Transactions: ' + context.raw;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { precision: 0, color: '#64748b', font: { family: 'Plus Jakarta Sans', weight: '600' } },
+                    grid: { color: 'rgba(255,255,255,0.05)' }
+                },
+                x: {
+                    ticks: { color: '#64748b', font: { family: 'Plus Jakarta Sans', weight: '600' } },
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+
+    // ── Loan doughnut chart ──
+    const loanPending  = /*[[${loanStats.pending}]]*/ 0;
+    const loanApproved = /*[[${loanStats.approved}]]*/ 0;
+    const loanRejected = /*[[${loanStats.rejected}]]*/ 0;
+    const loanActive   = /*[[${loanStats.active}]]*/ 0;
+    new Chart(document.getElementById('loanChart').getContext('2d'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Pending', 'Approved', 'Rejected', 'Active'],
+            datasets: [{
+                data: [loanPending, loanApproved, loanRejected, loanActive],
+                backgroundColor: ['#fef08a','#86efac','#fca5a5','#93c5fd'],
+                borderColor:     ['#f59e0b','#10b981','#ef4444','#4f46e5'],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { font: { family: 'Plus Jakarta Sans', weight: '600', size: 11 }, padding: 12 } } },
+            cutout: '72%'
+        }
+    });
+});
+/*]]>*/
+</script>
+
+</th:block>
+</div>
+</body>
+</html>

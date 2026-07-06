@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  smartbank:
+    build: .
+    container_name: smartbank-app
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=h2
+    restart: unless-stopped

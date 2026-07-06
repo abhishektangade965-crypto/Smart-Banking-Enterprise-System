@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{common/layout :: head-resources}">
+</head>
+<body>
+<div th:replace="~{common/layout :: layout(~{::content}, 'My Accounts')}">
+<th:block th:fragment="content">
+<div class="row g-4">
+    <div th:each="acc : ${accounts}" class="col-md-6">
+        <div class="account-card" style="box-shadow: 0 15px 35px rgba(79, 70, 229, 0.25);">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem;position:relative;z-index:1;">
+                <div>
+                    <div style="font-size:.72rem;opacity:.8;font-weight:700;text-transform:uppercase;letter-spacing:1px;" th:text="${acc.accountType} + ' ACCOUNT'">SAVINGS ACCOUNT</div>
+                    <div style="font-size:.85rem;font-family:monospace;opacity:.7;margin-top:.2rem;" th:text="${#strings.substring(acc.accountNumber,0,4) + ' **** **** ' + #strings.substring(acc.accountNumber,12)}"></div>
+                </div>
+                <span class="badge-status badge-active" th:text="${acc.status}">ACTIVE</span>
+            </div>
+            <div style="position:relative;z-index:1;">
+                <div style="font-size:.72rem;opacity:.8;text-transform:uppercase;letter-spacing:1px;">Available Ledger Balance</div>
+                <div style="font-size:2.2rem;font-weight:800;margin-top:.1rem;">&#x20B9;<span th:text="${#numbers.formatDecimal(acc.balance, 0, 'COMMA', 2, 'POINT')}"></span></div>
+                <hr style="border-color:rgba(255,255,255,.15);margin:1.2rem 0;"/>
+                <div class="d-flex justify-content-between" style="font-size:.8rem;opacity:.85;">
+                    <div>Branch: <strong th:text="${acc.branch != null ? acc.branch.branchName : '-'}"></strong></div>
+                    <div>IFSC Code: <strong th:text="${acc.branch != null ? acc.branch.ifscCode : '-'}"></strong></div>
+                </div>
+                <div style="font-size:.75rem;opacity:.75;margin-top:.5rem;">Timestamp Opened: <span th:text="${#temporals.format(acc.openingDate,'dd MMM yyyy')}"></span></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- EMPTY STATE IF NO ACCOUNTS -->
+    <div class="col-12" th:if="${accounts == null or accounts.empty}">
+        <div class="data-table-card p-5 text-center d-flex flex-column align-items-center justify-content-center" style="min-height: 350px;">
+            <i class="fas fa-university text-muted mb-3" style="font-size:3.5rem;"></i>
+            <h5 class="fw-bold mb-2">No Active Accounts Found</h5>
+            <p class="text-muted small mb-4" style="max-width: 420px;">You currently don't have any savings or current ledger accounts configured. Please reach out to your nearest branch manager or connect with customer support to open one.</p>
+            <a th:href="@{/customer/profile}" class="btn btn-primary-custom"><i class="fas fa-user-circle me-2"></i>View Profile Details</a>
+        </div>
+    </div>
+</div>
+</th:block>
+</div>
+</body>
+</html>

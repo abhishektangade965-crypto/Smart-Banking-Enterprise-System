@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{common/layout :: head-resources}">
+</head>
+<body>
+<div th:replace="~{common/layout :: layout(~{::content}, 'Card Management')}">
+<th:block th:fragment="content">
+<div class="data-table-card">
+    <div class="card-header-custom"><h6><i class="fas fa-credit-card me-2 text-primary"></i>All Cards Ledger</h6></div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead><tr><th>Card Number</th><th>Type</th><th>Account</th><th>Customer</th><th>Expiry</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+            <tr th:each="c : ${cards}">
+                <td><code style="font-size:0.8rem;" th:text="${#strings.substring(c.cardNumber,0,4) + ' **** **** ' + #strings.substring(c.cardNumber,12)}"></code></td>
+                <td><span th:text="${c.cardType}" style="font-size:.72rem;background:var(--primary-glow);color:var(--primary);padding:.25rem .5rem;border-radius:6px;font-weight:700;"></span></td>
+                <td style="font-size:.8rem;" th:text="${#strings.substring(c.account.accountNumber,0,6) + '...'}"></td>
+                <td class="fw-bold" th:text="${c.account.customer.fullName}"></td>
+                <td th:text="${#temporals.format(c.expiryDate,'MM/yy')}" style="font-weight: 600;"></td>
+                <td>
+                    <span class="badge-status badge-active" th:if="${c.status.name() == 'ACTIVE'}">Active</span>
+                    <span class="badge-status badge-rejected" th:if="${c.status.name() == 'BLOCKED'}">Blocked</span>
+                    <span class="badge-status badge-inactive" th:if="${c.status.name() == 'EXPIRED'}">Expired</span>
+                </td>
+                <td>
+                    <form th:action="@{/admin/cards/{id}/block(id=${c.id})}" method="POST" style="display:inline;" th:if="${c.status.name() == 'ACTIVE'}">
+                        <button type="submit" class="btn btn-sm btn-warning" style="border-radius:8px;font-size:.72rem; font-weight:700;">Block</button>
+                    </form>
+                    <form th:action="@{/admin/cards/{id}/unblock(id=${c.id})}" method="POST" style="display:inline;" th:if="${c.status.name() == 'BLOCKED'}">
+                        <button type="submit" class="btn btn-sm btn-success" style="border-radius:8px;font-size:.72rem; font-weight:700;">Unblock</button>
+                    </form>
+                </td>
+            </tr>
+            <tr th:if="${cards.empty}">
+                <td colspan="7" class="text-center py-5">
+                    <div class="d-flex flex-column align-items-center justify-content-center py-4">
+                        <i class="fas fa-credit-card text-muted mb-3" style="font-size:3rem;"></i>
+                        <h6 class="fw-bold text-muted">No Cards Registered</h6>
+                        <p class="text-muted small">No credit or debit schemes have been requested yet.</p>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</th:block>
+</div>
+</body>
+</html>

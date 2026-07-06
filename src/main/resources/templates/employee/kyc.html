@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{common/layout :: head-resources}">
+</head>
+<body>
+<div th:replace="~{common/layout :: layout(~{::content}, 'KYC Verification')}">
+<th:block th:fragment="content">
+<div class="data-table-card">
+    <div class="card-header-custom"><h6><i class="fas fa-id-card me-2 text-primary"></i>Customer KYC Status</h6></div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead><tr><th>Customer ID</th><th>Name</th><th>Email</th><th>Mobile</th><th>PAN</th><th>Aadhaar</th><th>KYC Status</th><th>Actions</th></tr></thead>
+            <tbody>
+            <tr th:each="c : ${customers}">
+                <td><code style="font-size:0.75rem;" th:text="${c.customerId}"></code></td>
+                <td class="fw-bold" th:text="${c.fullName}"></td>
+                <td th:text="${c.email}"></td>
+                <td th:text="${c.mobileNumber}"></td>
+                <td th:text="${c.panNumber ?: '-'}"></td>
+                <td th:text="${c.aadhaarNumber != null ? #strings.substring(c.aadhaarNumber,0,4)+' **** ****' : '-'}"></td>
+                <td>
+                    <span class="badge-status badge-pending" th:if="${c.kycStatus.name() == 'PENDING'}">Pending</span>
+                    <span class="badge-status badge-active" th:if="${c.kycStatus.name() == 'VERIFIED'}">Verified</span>
+                    <span class="badge-status badge-rejected" th:if="${c.kycStatus.name() == 'REJECTED'}">Rejected</span>
+                </td>
+                <td th:if="${c.kycStatus.name() == 'PENDING'}">
+                    <div class="d-flex gap-1">
+                        <form th:action="@{/employee/kyc/{id}/verify(id=${c.id})}" method="POST" style="display:inline;" onsubmit="return confirm('Verify KYC?')">
+                            <button type="submit" class="btn btn-sm btn-success" style="border-radius:8px;font-size:.72rem; font-weight:700;">
+                                <i class="fas fa-check me-1"></i>Verify
+                            </button>
+                        </form>
+                    </div>
+                </td>
+                <td th:unless="${c.kycStatus.name() == 'PENDING'}"><span style="font-size:.78rem;color:var(--text-muted); font-weight:600;">Processed</span></td>
+            </tr>
+            <tr th:if="${customers.empty}">
+                <td colspan="8" class="text-center py-5">
+                    <div class="d-flex flex-column align-items-center justify-content-center py-4">
+                        <i class="fas fa-id-card text-muted mb-3" style="font-size:3rem;"></i>
+                        <h6 class="fw-bold text-muted">No KYC Tasks Found</h6>
+                        <p class="text-muted small">No pending customer profiles require identity review verification.</p>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</th:block>
+</div>
+</body>
+</html>

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{common/layout :: head-resources}">
+</head>
+<body>
+<div th:replace="~{common/layout :: layout(~{::content}, 'My Dashboard')}">
+<th:block th:fragment="content">
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div style="background: linear-gradient(135deg, var(--primary) 0%, #1e1b4b 60%, var(--secondary) 100%); border-radius: 24px; padding: 2.2rem; color: #fff; position: relative; overflow: hidden; box-shadow: 0 20px 40px rgba(79, 70, 229, 0.15);">
+            <div style="position:absolute;top:-50px;right:-50px;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,.04);"></div>
+            <div style="position:absolute;bottom:-70px;left:30px;width:280px;height:280px;border-radius:50%;background:rgba(255,255,255,.03);"></div>
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <span style="font-weight: 700; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 2px; color: var(--secondary);">Digital Banking Core</span>
+                    <h2 class="mt-1 mb-2" style="font-weight: 800; font-size: 2rem;">Welcome back, <span th:text="${customer != null ? customer.fullName : 'Customer'}">Customer</span>!</h2>
+                    <p style="opacity: .75; font-size: 0.88rem; margin-bottom: 1.5rem;">Secure Account Ledger ID: <code style="color:var(--secondary); font-weight:700;" th:text="${customer != null ? customer.customerId : '-'}">-</code></p>
+                    <div class="d-flex gap-3 flex-wrap">
+                        <a th:href="@{/customer/transfer}" class="btn btn-premium btn-sm py-2 px-4"><i class="fas fa-paper-plane me-2"></i>Send Money</a>
+                        <a th:href="@{/customer/loans}" class="btn btn-premium-outline btn-sm py-2 px-4 text-white" style="background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.25);"><i class="fas fa-hand-holding-usd me-2"></i>Apply Loan</a>
+                        <a th:href="@{/customer/cards}" class="btn btn-premium-outline btn-sm py-2 px-4 text-white" style="background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.25);"><i class="fas fa-credit-card me-2"></i>Manage Cards</a>
+                    </div>
+                </div>
+                <div class="col-md-4 mt-4 mt-md-0">
+                    <!-- AI INSIGHTS WIDGET -->
+                    <div class="glass-panel p-3" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); border-radius: 16px;">
+                        <div style="font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; display:flex; align-items:center; gap:8px;"><i class="fas fa-robot text-secondary"></i> AI Copilot Insight</div>
+                        <p class="mb-0 mt-2" style="font-size:0.8rem; line-height:1.4; opacity:0.9;">"Your monthly spending has decreased by 12% compared to last week. Good job! Setup a recurring deposit to maximize interest yields."</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- KPI ROW -->
+<div class="row g-4 mb-4">
+    <!-- Balance card -->
+    <div th:each="acc : ${accounts}" class="col-md-6 col-lg-4">
+        <div class="account-card">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.5rem;position:relative;z-index:1;">
+                <div>
+                    <div style="font-size:.72rem;opacity:.75;font-weight:700;text-transform:uppercase;letter-spacing:1px;" th:text="${acc.accountType} + ' ACCOUNT'">SAVINGS ACCOUNT</div>
+                    <div style="font-size:.82rem;opacity:.65;font-family:monospace;margin-top:.2rem;" th:text="${#strings.substring(acc.accountNumber,0,4) + ' **** **** ' + #strings.substring(acc.accountNumber,12)}"></div>
+                </div>
+                <div style="font-size:1.4rem;opacity:.7;"><i class="fas fa-university"></i></div>
+            </div>
+            <div style="position:relative;z-index:1;">
+                <div style="font-size:.72rem;opacity:.75;text-transform:uppercase;letter-spacing:1px;">Available Ledger Balance</div>
+                <div style="font-size:2.2rem;font-weight:800;margin-top:.2rem;">&#x20B9;<span th:text="${#numbers.formatDecimal(acc.balance, 0, 'COMMA', 2, 'POINT')}"></span></div>
+                <div style="margin-top:.8rem;display:flex;justify-content:space-between;align-items:center;">
+                    <span style="font-size:.78rem;opacity:.75;">Opened: <span th:text="${#temporals.format(acc.openingDate,'dd MMM yyyy')}"></span></span>
+                    <span class="badge-status badge-active" th:text="${acc.status}">ACTIVE</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-4" th:if="${accounts == null or accounts.empty}">
+        <div class="data-table-card p-4 text-center d-flex flex-column align-items-center justify-content-center" style="min-height: 200px;">
+            <i class="fas fa-university text-muted" style="font-size:2.5rem;"></i>
+            <p class="text-muted mt-3 mb-0">No active accounts found. Contact support to open a savings ledger.</p>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Quick Actions -->
+    <div class="col-lg-6">
+        <div class="data-table-card h-100">
+            <div class="card-header-custom"><h6><i class="fas fa-bolt me-2 text-warning"></i>Quick Services</h6></div>
+            <div class="p-4">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <a th:href="@{/customer/transfer}" class="d-flex flex-column align-items-center p-3 text-decoration-none glass-panel h-100" style="transition:all .2s;">
+                            <i class="fas fa-paper-plane mb-2 text-primary" style="font-size:1.5rem;"></i>
+                            <span style="font-size:.8rem;font-weight:700;color:var(--text-main);">Transfer Money</span>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a th:href="@{/customer/transactions}" class="d-flex flex-column align-items-center p-3 text-decoration-none glass-panel h-100" style="transition:all .2s;">
+                            <i class="fas fa-list-alt mb-2 text-success" style="font-size:1.5rem;"></i>
+                            <span style="font-size:.8rem;font-weight:700;color:var(--text-main);">View Statement</span>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a th:href="@{/customer/loans}" class="d-flex flex-column align-items-center p-3 text-decoration-none glass-panel h-100" style="transition:all .2s;">
+                            <i class="fas fa-hand-holding-usd mb-2 text-warning" style="font-size:1.5rem;"></i>
+                            <span style="font-size:.8rem;font-weight:700;color:var(--text-main);">My Loans</span>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a th:href="@{/customer/beneficiaries}" class="d-flex flex-column align-items-center p-3 text-decoration-none glass-panel h-100" style="transition:all .2s;">
+                            <i class="fas fa-address-book mb-2 text-info" style="font-size:1.5rem;"></i>
+                            <span style="font-size:.8rem;font-weight:700;color:var(--text-main);">Beneficiaries</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- KYC & Profile Status -->
+    <div class="col-lg-6">
+        <div class="data-table-card h-100">
+            <div class="card-header-custom"><h6><i class="fas fa-user-shield me-2 text-primary"></i>Profile verification status</h6></div>
+            <div class="p-4 text-center d-flex flex-column align-items-center justify-content-center" style="min-height:220px;">
+                <div th:if="${customer != null}">
+                    <div style="font-size:3rem;margin-bottom:0.8rem;">
+                        <i class="fas fa-check-circle text-success" th:if="${customer.kycStatus.name() == 'VERIFIED'}"></i>
+                        <i class="fas fa-clock text-warning" th:if="${customer.kycStatus.name() == 'PENDING'}"></i>
+                        <i class="fas fa-times-circle text-danger" th:if="${customer.kycStatus.name() == 'REJECTED'}"></i>
+                    </div>
+                    <h5 style="font-weight:800; text-transform:uppercase; letter-spacing:1px;" th:text="${customer.kycStatus}">PENDING</h5>
+                    <p class="text-muted small mt-2 mb-0" th:if="${customer.kycStatus.name() == 'VERIFIED'}">Institutional KYC verified. Full access to instant transfers and loans enabled.</p>
+                    <p class="text-muted small mt-2 mb-0" th:if="${customer.kycStatus.name() == 'PENDING'}">Your KYC review is currently pending. Operations personnel will verify your documents shortly.</p>
+                    <p class="text-muted small mt-2 mb-0" th:if="${customer.kycStatus.name() == 'REJECTED'}">Identity validation failed. Please check documentation and contact your branch officer.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CHARTS & TRANSACTION DENSITY -->
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="data-table-card">
+            <div class="card-header-custom">
+                <h6><i class="fas fa-chart-area me-2 text-primary"></i>Spend Trends & Financial Analytics</h6>
+            </div>
+            <div class="p-4" style="height: 280px; position: relative;">
+                <canvas id="monthlySpendingChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="data-table-card h-100">
+            <div class="card-header-custom"><h6><i class="fas fa-bullseye me-2 text-primary"></i>Budget & Goals</h6></div>
+            <div class="p-4">
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1" style="font-size:0.78rem; font-weight:700;">
+                        <span>Monthly Budget Threshold</span>
+                        <span>75% used</span>
+                    </div>
+                    <div class="progress" style="height: 6px; border-radius:10px;">
+                        <div class="progress-bar bg-warning" role="progressbar" style="width: 75%; border-radius:10px;"></div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1" style="font-size:0.78rem; font-weight:700;">
+                        <span>Holiday Savings Goal</span>
+                        <span>₹25,000 / ₹50,000</span>
+                    </div>
+                    <div class="progress" style="height: 6px; border-radius:10px;">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: 50%; border-radius:10px;"></div>
+                    </div>
+                </div>
+                <div class="mb-0">
+                    <div class="d-flex justify-content-between mb-1" style="font-size:0.78rem; font-weight:700;">
+                        <span>Emergency Fund</span>
+                        <span>₹15,000 / ₹30,000</span>
+                    </div>
+                    <div class="progress" style="height: 6px; border-radius:10px;">
+                        <div class="progress-bar bg-primary" role="progressbar" style="width: 50%; border-radius:10px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const ctx = document.getElementById('monthlySpendingChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+                datasets: [{
+                    label: 'Monthly Spending (₹)',
+                    data: [12000, 19000, 15000, 25000, 22000, 30000, 28000],
+                    borderColor: '#4f46e5',
+                    backgroundColor: 'rgba(79, 70, 229, 0.05)',
+                    fill: true,
+                    tension: 0.45,
+                    borderWidth: 3,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#4f46e5'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        grid: {
+                            color: 'rgba(0,0,0,0.04)'
+                        },
+                        ticks: {
+                            color: '#64748b',
+                            font: {
+                                family: 'Plus Jakarta Sans',
+                                weight: '600',
+                                size: 10
+                            }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#64748b',
+                            font: {
+                                family: 'Plus Jakarta Sans',
+                                weight: '600',
+                                size: 10
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+</th:block>
+</div>
+</body>
+</html>

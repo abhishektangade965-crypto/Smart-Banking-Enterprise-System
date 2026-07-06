@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <th:block th:fragment="head-resources">
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-glow: rgba(37, 99, 235, 0.08);
+            --secondary: #6366f1;
+            --accent: #06b6d4;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg-main: #f8fafc;
+            --bg-card: rgba(255, 255, 255, 0.75);
+            --border-color: rgba(255, 255, 255, 0.35);
+            --border-dark-subtle: rgba(15, 23, 42, 0.06);
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --sidebar-bg: #ffffff;
+            --sidebar-text: #0f172a;
+            --sidebar-text-muted: #64748b;
+            --sidebar-w: 260px;
+            --glass-border: rgba(255, 255, 255, 0.8);
+            --radius-premium: 16px;
+            --shadow: 0 20px 60px rgba(15, 23, 42, 0.05);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-main);
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+
+        /* ─── Sidebar (SmartLogisticsSCM Styled) ─── */
+        .sidebar {
+            width: var(--sidebar-w);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border-dark-subtle);
+            z-index: 1000;
+            overflow-y: auto;
+            transition: all .3s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 1.5rem 1rem;
+            box-shadow: 2px 0 20px rgba(15, 23, 42, 0.02);
+        }
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.06); border-radius: 2px; }
+
+        .sidebar-brand {
+            padding: 0.5rem 0.5rem 1.5rem 0.5rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+            margin-bottom: 1.5rem;
+        }
+        .sidebar-brand .logo { display:flex; align-items:center; }
+        .sidebar-brand .brand-logo-img {
+            height: 48px;
+            width: auto;
+            object-fit: contain;
+            max-width: 200px;
+        }
+ 
+        .nav-section-title {
+            padding: .8rem .75rem .4rem;
+            font-size:.68rem; font-weight:700; letter-spacing:1.5px;
+            text-transform:uppercase; color: var(--sidebar-text-muted);
+            opacity: 0.8;
+        }
+        .nav-item a {
+            display:flex; align-items:center; gap:.75rem;
+            padding:.7rem .85rem; color: var(--sidebar-text-muted);
+            text-decoration:none; font-size:.87rem; font-weight:600;
+            border-radius:12px; transition:all .2s ease; margin-bottom: 0.2rem;
+            border: 1px solid transparent;
+        }
+        .nav-item a:hover {
+            background: #f1f5f9;
+            color: var(--primary);
+        }
+        .nav-item a.active {
+            background: var(--primary-glow);
+            color: var(--primary);
+            font-weight: 700;
+        }
+        .nav-item a .nav-icon { width:20px; text-align:center; font-size:.95rem; flex-shrink:0; }
+
+        /* ─── Topbar ─── */
+        .main-content {
+            margin-left: var(--sidebar-w);
+            padding: 2rem;
+            transition: all .3s ease;
+        }
+        .topbar {
+            background: var(--bg-card);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: .85rem 1.5rem;
+            display:flex; align-items:center; justify-content:space-between;
+            position:sticky; top:2vh; z-index:900;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+        .topbar-title { font-size:1.1rem; font-weight:800; color:var(--text-main); }
+        .topbar-actions { display:flex; align-items:center; gap:1.25rem; }
+        
+        .search-trigger {
+            background: rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+            padding: 0.45rem 1rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        .search-trigger:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .topbar-avatar {
+            width:36px; height:36px; border-radius:50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display:flex; align-items:center; justify-content:center;
+            color:#fff; font-weight:800; font-size:.85rem; cursor:pointer;
+            box-shadow: 0 4px 10px var(--primary-glow);
+        }
+
+        /* ─── SmartLogisticsSCM Styled top-bordered Cards ─── */
+        .stat-card {
+            border-radius: 14px !important;
+            padding: 1.5rem;
+            background: #ffffff !important;
+            border: 1px solid rgba(0, 0, 0, 0.05) !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02) !important;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(15, 23, 42, 0.06) !important;
+        }
+        
+        /* 4px top-border color codes to match orders/shipment overview cards */
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+        }
+        .stat-card.card-blue::before { background: var(--primary); }
+        .stat-card.card-indigo::before { background: var(--secondary); }
+        .stat-card.card-teal::before { background: var(--accent); }
+        .stat-card.card-orange::before { background: var(--warning); }
+        .stat-card.card-red::before { background: var(--danger); }
+        .stat-card.card-green::before { background: var(--success); }
+
+        .stat-card .stat-icon {
+            width: 44px; height: 44px; border-radius: 10px;
+            background: #f8fafc;
+            color: var(--text-muted);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex; align-items: center; justify-content: center; font-size: 1.15rem;
+        }
+        .stat-card .stat-value { font-size: 1.65rem; font-weight: 800; line-height: 1; margin: .8rem 0 .2rem; color: var(--text-main); }
+        .stat-card .stat-label { font-size: .78rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* ─── Premium Tables ─── */
+        .data-table-card {
+            background: #ffffff !important;
+            border-radius: 14px !important;
+            border: 1px solid rgba(0, 0, 0, 0.05) !important;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02) !important;
+        }
+        .data-table-card .card-header-custom {
+            padding:1.2rem 1.5rem;
+            background: transparent;
+            border-bottom:1px solid rgba(0, 0, 0, 0.05);
+            display:flex; align-items:center; justify-content:space-between;
+        }
+        .data-table-card .card-header-custom h6 { font-size:.95rem; font-weight:800; color:var(--text-main); margin:0; }
+        
+        .table th {
+            font-size:.72rem; font-weight:700;
+            text-transform:uppercase; letter-spacing:1px;
+            color: var(--text-muted);
+            border-bottom:1.5px solid rgba(0, 0, 0, 0.05);
+            padding:1rem;
+            background: #f8fafc;
+        }
+        .table td {
+            padding:.95rem 1rem;
+            font-size:.87rem;
+            color: var(--text-main);
+            vertical-align:middle;
+            border-bottom:1px solid rgba(0, 0, 0, 0.04);
+            background: transparent;
+        }
+        .table tr:last-child td { border-bottom:none; }
+        .table-hover tbody tr:hover { background: #f8fafc !important; }
+
+        /* ─── Badges ─── */
+        .badge-status { padding:.35rem .7rem; border-radius:8px; font-size:.72rem; font-weight:700; display:inline-block; }
+        .badge-active { background:rgba(16, 185, 129, 0.1); color:#10b981; }
+        .badge-inactive { background:rgba(100, 116, 139, 0.1); color:#64748b; }
+        .badge-pending { background:rgba(245, 158, 11, 0.1); color:#f59e0b; }
+        .badge-verified { background:rgba(16, 185, 129, 0.1); color:#10b981; }
+        .badge-rejected { background:rgba(239, 68, 68, 0.1); color:#ef4444; }
+        .badge-frozen { background:rgba(37, 99, 235, 0.1); color:var(--primary); }
+        .badge-blocked { background:rgba(239, 68, 68, 0.1); color:#ef4444; }
+
+        /* ─── Buttons ─── */
+        .btn-primary-custom {
+            background: var(--primary);
+            border: none;
+            color:#fff; padding:.6rem 1.4rem;
+            border-radius:10px; font-weight:700; font-size:.85rem;
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.15);
+            transition: all .2s ease;
+        }
+        .btn-primary-custom:hover { transform:translateY(-1px); box-shadow: 0 6px 15px rgba(37, 99, 235, 0.25); color:#fff; }
+
+        /* ─── Forms ─── */
+        .form-card {
+            background: #ffffff !important;
+            border-radius: 14px !important;
+            border: 1px solid rgba(0, 0, 0, 0.05) !important;
+            padding:1.8rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02) !important;
+        }
+        .form-control, .form-select {
+            border-radius:10px;
+            border: 1.5px solid #e2e8f0 !important;
+            font-size:.875rem;
+            padding:.65rem 1.1rem;
+            background: #f8fafc !important;
+            color: var(--text-main) !important;
+            transition: all 0.2s ease;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary) !important;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+            background: #ffffff !important;
+        }
+
+        /* ─── COMMAND PALETTE MODAL ─── */
+        .cmd-modal {
+            max-width: 550px;
+            border-radius: 16px;
+            background: #ffffff;
+            border: 1px solid rgba(0, 0, 0, 0.08) !important;
+            box-shadow: var(--shadow);
+        }
+        .cmd-input {
+            border: none;
+            outline: none;
+            width: 100%;
+            background: transparent;
+            color: var(--text-main);
+            font-size: 1rem;
+            padding: 1.2rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .cmd-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0.85rem 1.2rem;
+            color: var(--text-main);
+            text-decoration: none;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .cmd-item:hover {
+            background: #f1f5f9;
+            transform: translateX(4px);
+        }
+
+        @media (max-width: 992px) {
+            .sidebar { transform: translateX(-110%); }
+            .sidebar.open { transform: translateX(0); left: 0; width: 260px; }
+            .main-content { margin-left: 0; }
+        }
+    </style>
+    </th:block>
+    <!-- Keep extra-head as empty fallback fragment -->
+    <th:block th:fragment="extra-head"></th:block>
+</head>
+<body>
+<div th:fragment="layout(content, title)" class="d-flex" style="min-height:100vh;">
+
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <div class="logo">
+                <img src="/images/smartbank-logo.png" alt="SmartBank" class="brand-logo-img"/>
+            </div>
+        </div>
+        <div class="sidebar-nav">
+            <!-- Admin Menu -->
+            <div sec:authorize="hasRole('ROLE_ADMIN')">
+                <div class="nav-section-title">Main</div>
+                <div class="nav-item"><a th:href="@{/dashboard}" th:classappend="${title == 'Admin Dashboard'} ? 'active' : ''"><span class="nav-icon"><i class="fas fa-chart-pie"></i></span>Dashboard</a></div>
+                <div class="nav-section-title">Management</div>
+                <div class="nav-item"><a th:href="@{/admin/customers}" th:classappend="${title == 'Customer Management'} ? 'active' : ''"><span class="nav-icon"><i class="fas fa-users"></i></span>Customers</a></div>
+                <div class="nav-item"><a th:href="@{/admin/accounts}" th:classappend="${title == 'Account Management'} ? 'active' : ''"><span class="nav-icon"><i class="fas fa-university"></i></span>Accounts</a></div>
+                <div class="nav-item"><a th:href="@{/admin/transactions}" th:classappend="${title == 'Transaction Management'} ? 'active' : ''"><span class="nav-icon"><i class="fas fa-exchange-alt"></i></span>Transactions</a></div>
+                <div class="nav-item"><a th:href="@{/admin/loans}" th:classappend="${title == 'Loan Management'} ? 'active' : ''"><span class="nav-icon"><i class="fas fa-hand-holding-usd"></i></span>Loans</a></div>
+                <div class="nav-item"><a th:href="@{/admin/cards}" th:classappend="${title == 'Card Management'} ? 'active' : ''"><span class="nav-icon"><i class="fas fa-credit-card"></i></span>Cards</a></div>
+                <div class="nav-section-title">Organization</div>
+                <div class="nav-item"><a th:href="@{/admin/employees}" th:classappend="${title == 'Employee Management'} ? 'active' : ''"><span class="nav-icon"><i class="fas fa-user-tie"></i></span>Employees</a></div>
+                <div class="nav-item"><a th:href="@{/admin/branches}" th:classappend="${title == 'Branch Management'} ? 'active' : ''"><span class="nav-icon"><i class="fas fa-building"></i></span>Branches</a></div>
+            </div>
+            <!-- Customer Menu -->
+            <div sec:authorize="hasRole('ROLE_CUSTOMER')">
+                <div class="nav-section-title">My Banking</div>
+                <div class="nav-item"><a th:href="@{/dashboard}" th:classappend="${title == 'My Dashboard'} ? 'active' : ''"><span class="nav-icon"><i class="fas fa-th-large"></i></span>Dashboard</a></div>
+                <div class="nav-item"><a th:href="@{/customer/accounts}" th:classappend="${title == 'My Accounts'} ? 'active' : ''"><span class="nav-icon"><i class="fas fa-wallet"></i></span>My Accounts</a></div>
+                <div class="nav-item"><a th:href="@{/customer/transactions}" th:classappend="${title == 'Transaction History'} ? 'active' : ''"><span class="nav-icon"><i class="fas fa-list-alt"></i></span>Transactions</a></div>
+                <div class="nav-item"><a th:href="@{/customer/transfer}" th:classappend="${title == 'Fund Transfer'} ? 'active' : ''"><span class="nav-icon"><i class="fas fa-paper-plane"></i></span>Fund Transfer</a></div>
+                <div class="nav-item"><a th:href="@{/customer/beneficiaries}" th:classappend="${title == 'Beneficiaries'} ? 'active' : ''"><span class="nav-icon"><i class="fas fa-address-book"></i></span>Beneficiaries</a></div>
+                <div class="nav-section-title">Services</div>
+                <div class="nav-item"><a th:href="@{/customer/loans}" th:classappend="${title == 'My Loans'} ? 'active' : ''"><span class="nav-icon"><i class="fas fa-hand-holding-usd"></i></span>Loans</a></div>
+                <div class="nav-item"><a th:href="@{/customer/cards}" th:classappend="${title == 'My Cards'} ? 'active' : ''"><span class="nav-icon"><i class="fas fa-credit-card"></i></span>Cards</a></div>
+                <div class="nav-item"><a th:href="@{/customer/profile}" th:classappend="${title == 'My Profile'} ? 'active' : ''"><span class="nav-icon"><i class="fas fa-user-circle"></i></span>Profile</a></div>
+            </div>
+            <!-- Employee Menu -->
+            <div sec:authorize="hasRole('ROLE_EMPLOYEE')">
+                <div class="nav-section-title">Operations</div>
+                <div class="nav-item"><a th:href="@{/dashboard}" th:classappend="${title == 'Employee Dashboard'} ? 'active' : ''"><span class="nav-icon"><i class="fas fa-th-large"></i></span>Dashboard</a></div>
+                <div class="nav-item"><a th:href="@{/employee/kyc}" th:classappend="${title == 'KYC Verification'} ? 'active' : ''"><span class="nav-icon"><i class="fas fa-id-card"></i></span>KYC Verification</a></div>
+                <div class="nav-item"><a th:href="@{/employee/loans}" th:classappend="${title == 'Loan Verification'} ? 'active' : ''"><span class="nav-icon"><i class="fas fa-file-alt"></i></span>Loan Verification</a></div>
+            </div>
+
+            <div class="nav-section-title" style="margin-top:1rem;">Account</div>
+            <div class="nav-item">
+                <form th:action="@{/auth/logout}" method="post" style="margin:0;padding:0;">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <button type="submit" style="display:flex;align-items:center;gap:.75rem;padding:.7rem .85rem;color:var(--text-muted);background:none;border:none;width:100%;font-size:.87rem;font-weight:600;cursor:pointer;transition:all .2s;border-radius:10px;">
+                        <span class="nav-icon"><i class="fas fa-sign-out-alt"></i></span>Logout
+                    </button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <div class="main-content flex-fill">
+        <div class="topbar">
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-sm d-lg-none" onclick="document.getElementById('sidebar').classList.toggle('open')">
+                    <i class="fas fa-bars" style="color:var(--text-main);"></i>
+                </button>
+                <span class="topbar-title" th:text="${title} ?: 'Dashboard'">Dashboard</span>
+            </div>
+            <div class="topbar-actions">
+                <!-- Command Palette Trigger -->
+                <div class="search-trigger" onclick="toggleCommandPalette()">
+                    <i class="fas fa-search"></i>
+                    <span>Search...</span>
+                    <span style="font-size:0.7rem;background:rgba(0,0,0,0.06);padding:2px 5px;border-radius:4px;font-family:monospace;color:var(--text-muted);">Ctrl+K</span>
+                </div>
+
+                <!-- Live Notification Bell -->
+                <div class="position-relative" style="cursor:pointer;" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-bell text-secondary fs-5"></i>
+                    <span id="notif-badge"
+                          class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                          style="font-size:.6rem;display:none;">0</span>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 p-0" style="min-width:300px;border-radius:16px;overflow:hidden;" id="notif-dropdown">
+                        <li class="px-3 py-3 border-bottom" style="background:rgba(0,0,0,0.02);"><strong style="font-size:.85rem;">System Notifications</strong></li>
+                        <li id="notif-list"><li class="px-3 py-3 text-muted" style="font-size:.82rem;">Loading pending events...</li></li>
+                    </ul>
+                </div>
+
+                <div class="d-flex align-items-center gap-2">
+                    <div class="topbar-avatar" sec:authentication="name" th:text="${#strings.substring(#authentication.name, 0, 1).toUpperCase()}">U</div>
+                    <div class="d-none d-sm-block">
+                        <div style="font-size:.82rem;font-weight:700;" sec:authentication="name">User</div>
+                        <div style="font-size:.7rem;color:var(--text-muted);font-weight:600;">
+                            <span sec:authorize="hasRole('ROLE_ADMIN')">Administrator</span>
+                            <span sec:authorize="hasRole('ROLE_CUSTOMER')">Customer</span>
+                            <span sec:authorize="hasRole('ROLE_EMPLOYEE')">Employee</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="page-content">
+            <!-- Alerts -->
+            <div th:if="${success}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert" style="background: rgba(16, 185, 129, 0.12); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.15);">
+                <i class="fas fa-check-circle me-2"></i><span th:text="${success}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert" style="background: rgba(239, 68, 68, 0.12); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.15);">
+                <i class="fas fa-exclamation-circle me-2"></i><span th:text="${error}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <th:block th:replace="${content}"/>
+        </div>
+    </div>
+
+    <!-- COMMAND PALETTE MODAL -->
+    <div class="modal fade" id="cmdPaletteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content cmd-modal">
+                <div class="modal-body p-0">
+                    <input type="text" class="cmd-input" placeholder="Search pages, customers or actions..." id="cmdSearchInput" onkeyup="filterCommandItems()"/>
+                    <div class="p-3" id="cmdItemsList">
+                        <!-- Admin Navigation links -->
+                        <div sec:authorize="hasRole('ROLE_ADMIN')">
+                            <a href="/dashboard" class="cmd-item"><i class="fas fa-chart-pie"></i> Dashboard</a>
+                            <a href="/admin/customers" class="cmd-item"><i class="fas fa-users"></i> Customers</a>
+                            <a href="/admin/accounts" class="cmd-item"><i class="fas fa-university"></i> Accounts</a>
+                            <a href="/admin/transactions" class="cmd-item"><i class="fas fa-exchange-alt"></i> Transactions</a>
+                            <a href="/admin/loans" class="cmd-item"><i class="fas fa-hand-holding-usd"></i> Loans</a>
+                            <a href="/admin/cards" class="cmd-item"><i class="fas fa-credit-card"></i> Cards</a>
+                            <a href="/admin/employees" class="cmd-item"><i class="fas fa-user-tie"></i> Employees</a>
+                            <a href="/admin/branches" class="cmd-item"><i class="fas fa-building"></i> Branches</a>
+                        </div>
+                        <!-- Customer Navigation links -->
+                        <div sec:authorize="hasRole('ROLE_CUSTOMER')">
+                            <a href="/dashboard" class="cmd-item"><i class="fas fa-th-large"></i> Dashboard</a>
+                            <a href="/customer/accounts" class="cmd-item"><i class="fas fa-wallet"></i> My Accounts</a>
+                            <a href="/customer/transactions" class="cmd-item"><i class="fas fa-list-alt"></i> Transactions</a>
+                            <a href="/customer/transfer" class="cmd-item"><i class="fas fa-paper-plane"></i> Fund Transfer</a>
+                            <a href="/customer/beneficiaries" class="cmd-item"><i class="fas fa-address-book"></i> Beneficiaries</a>
+                            <a href="/customer/loans" class="cmd-item"><i class="fas fa-hand-holding-usd"></i> My Loans</a>
+                            <a href="/customer/cards" class="cmd-item"><i class="fas fa-credit-card"></i> My Cards</a>
+                            <a href="/customer/profile" class="cmd-item"><i class="fas fa-user-circle"></i> Profile</a>
+                        </div>
+                        <!-- Employee Navigation links -->
+                        <div sec:authorize="hasRole('ROLE_EMPLOYEE')">
+                            <a href="/dashboard" class="cmd-item"><i class="fas fa-th-large"></i> Dashboard</a>
+                            <a href="/employee/kyc" class="cmd-item"><i class="fas fa-id-card"></i> KYC Verification</a>
+                            <a href="/employee/loans" class="cmd-item"><i class="fas fa-file-alt"></i> Loan Verification</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+    // Command Palette Trigger
+    let cmdModal;
+    document.addEventListener("DOMContentLoaded", function() {
+        cmdModal = new bootstrap.Modal(document.getElementById('cmdPaletteModal'));
+        
+        // Listen for Ctrl+K
+        document.addEventListener("keydown", function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                toggleCommandPalette();
+            }
+        });
+    });
+ 
+    function toggleCommandPalette() {
+        cmdModal.toggle();
+        setTimeout(() => {
+            const input = document.getElementById('cmdSearchInput');
+            if (input) input.focus();
+        }, 300);
+    }
+ 
+    function filterCommandItems() {
+        const query = document.getElementById('cmdSearchInput').value.toLowerCase();
+        const items = document.querySelectorAll('.cmd-item');
+        items.forEach(item => {
+            if (item.textContent.toLowerCase().includes(query)) {
+                item.style.setProperty('display', 'flex', 'important');
+            } else {
+                item.style.setProperty('display', 'none', 'important');
+            }
+        });
+    }
+ 
+    // Live notification badge polling
+    async function loadNotifications() {
+        try {
+            const res = await fetch('/admin/notifications/count');
+            if (!res.ok) return;
+            const data = await res.json();
+            const total = (data.pendingLoans || 0) + (data.pendingKyc || 0);
+            const badge = document.getElementById('notif-badge');
+            const list  = document.getElementById('notif-list');
+            if (!badge) return;
+            if (total > 0) {
+                badge.textContent = total > 99 ? '99+' : total;
+                badge.style.display = '';
+            } else {
+                badge.style.display = 'none';
+            }
+            let html = '';
+            if (data.pendingLoans > 0)
+                html += `<li><a class="dropdown-item py-2 px-3 border-bottom" href="/admin/loans" style="font-size:.82rem;"><i class="fas fa-file-alt text-warning me-2"></i><strong>${data.pendingLoans}</strong> pending loan application${data.pendingLoans>1?'s':''}</a></li>`;
+            if (data.pendingKyc > 0)
+                html += `<li><a class="dropdown-item py-2 px-3" href="/admin/customers" style="font-size:.82rem;"><i class="fas fa-id-card text-danger me-2"></i><strong>${data.pendingKyc}</strong> pending KYC verification${data.pendingKyc>1?'s':''}</a></li>`;
+            if (!html)
+                html = '<li class="px-3 py-3 text-muted text-center" style="font-size:.82rem;"><i class="fas fa-check-circle text-success me-2 fs-5"></i><br/>All clear — no pending tasks</li>';
+            if (list) list.innerHTML = html;
+        } catch(e) {}
+    }
+    loadNotifications();
+    setInterval(loadNotifications, 30000); // refresh every 30s
+    </script>
+</div>
+</body>
+</html>

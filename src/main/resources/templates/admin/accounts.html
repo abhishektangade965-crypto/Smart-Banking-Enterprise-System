@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{common/layout :: head-resources}"></head>
+<body>
+<div th:replace="~{common/layout :: layout(~{::content}, 'Account Management')}">
+<th:block th:fragment="content">
+
+<div class="row g-4 mb-4">
+    <!-- Open New Account -->
+    <div class="col-lg-4">
+        <div class="form-card mb-4">
+            <h6 style="font-weight:700;margin-bottom:1.2rem;"><i class="fas fa-plus-circle me-2 text-primary"></i>Open New Account</h6>
+            <form th:action="@{/admin/accounts/open}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf != null}"/>
+                <div class="mb-3">
+                    <label class="form-label">Customer Portfolio</label>
+                    <select name="customerId" class="form-select" required>
+                        <option value="">Select Customer</option>
+                        <option th:each="c : ${customers}" th:value="${c.id}" th:text="${c.fullName + ' (' + c.customerId + ')'}"></option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Branch Assignment</label>
+                    <select name="branchId" class="form-select" required>
+                        <option value="">Select Branch</option>
+                        <option th:each="b : ${branches}" th:value="${b.id}" th:text="${b.branchName}"></option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Account Strategy</label>
+                    <select name="accountType" class="form-select" required>
+                        <option value="SAVINGS">Savings Account</option>
+                        <option value="CURRENT">Current Account</option>
+                        <option value="SALARY">Salary Account</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Initial Ledger Deposit (₹)</label>
+                    <input type="number" name="initialDeposit" class="form-control"
+                           min="5000" step="0.01" value="5000" required placeholder="Minimum ₹5,000"/>
+                    <div class="form-text text-muted" style="font-size: 0.72rem;"><i class="fas fa-info-circle me-1"></i>Minimum ledger balance requirement is ₹5,000</div>
+                </div>
+                <button type="submit" class="btn btn-primary-custom w-100">Open Account</button>
+            </form>
+        </div>
+
+        <!-- Deposit / Withdraw Panel -->
+        <div class="form-card">
+            <h6 style="font-weight:700;margin-bottom:1.2rem;"><i class="fas fa-wallet me-2 text-success"></i>Direct Ledger Operation</h6>
+            <form th:action="@{/admin/accounts/fund}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf != null}"/>
+                <div class="mb-3">
+                    <label class="form-label">Account Number</label>
+                    <input type="text" name="accountNumber" class="form-control" placeholder="Enter account number" required/>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Transaction Strategy</label>
+                    <select name="operation" class="form-select" required>
+                        <option value="DEPOSIT">&#x2B; Deposit (Credit)</option>
+                        <option value="WITHDRAW">&#x2212; Withdraw (Debit)</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Amount (₹)</label>
+                    <input type="number" name="amount" class="form-control" min="1" step="0.01" placeholder="Enter amount" required/>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Remarks</label>
+                    <input type="text" name="remarks" class="form-control" placeholder="e.g. Cash deposit, correction"/>
+                </div>
+                <button type="submit" class="btn btn-primary-custom w-100" style="background:linear-gradient(135deg, #10b981, #059669); border:none; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.25);">
+                    <i class="fas fa-check me-2"></i>Process Transaction
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Accounts Table -->
+    <div class="col-lg-8">
+        <div class="data-table-card">
+            <div class="card-header-custom">
+                <h6><i class="fas fa-university me-2 text-primary"></i>All Accounts (<span th:text="${accounts.size()}">0</span>)</h6>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead><tr><th>Account No</th><th>Customer</th><th>Type</th><th>Balance</th><th>Status</th><th>Actions</th></tr></thead>
+                    <tbody>
+                    <tr th:each="a : ${accounts}">
+                        <td><code style="font-size:.78rem;" th:text="${a.accountNumber}"></code></td>
+                        <td class="fw-bold" th:text="${a.customer.fullName}"></td>
+                        <td th:text="${a.accountType}"></td>
+                        <td><strong class="fw-bold">&#x20B9;<span th:text="${#numbers.formatDecimal(a.balance, 0, 'COMMA', 2, 'POINT')}"></span></strong></td>
+                        <td>
+                            <span class="badge-status badge-active"   th:if="${a.status.name() == 'ACTIVE'}">Active</span>
+                            <span class="badge-status badge-inactive" th:if="${a.status.name() == 'INACTIVE'}">Inactive</span>
+                            <span class="badge-status badge-frozen"   th:if="${a.status.name() == 'FROZEN'}">Frozen</span>
+                            <span class="badge-status badge-rejected" th:if="${a.status.name() == 'CLOSED'}">Closed</span>
+                        </td>
+                        <td>
+                            <div class="d-flex gap-1">
+                                <form th:action="@{/admin/accounts/{id}/status/ACTIVE(id=${a.id})}" method="POST" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-success" style="border-radius:6px;font-size:.72rem;">Activate</button>
+                                </form>
+                                <form th:action="@{/admin/accounts/{id}/status/FROZEN(id=${a.id})}" method="POST" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-warning" style="border-radius:6px;font-size:.72rem;">Freeze</button>
+                                </form>
+                                <form th:action="@{/admin/accounts/{id}/status/CLOSED(id=${a.id})}" method="POST" style="display:inline;" onsubmit="return confirm('Close this account?')">
+                                    <button type="submit" class="btn btn-sm btn-danger" style="border-radius:6px;font-size:.72rem;">Close</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${accounts.empty}">
+                        <td colspan="6" class="text-center py-5">
+                            <div class="d-flex flex-column align-items-center justify-content-center py-4">
+                                <i class="fas fa-university text-muted mb-3" style="font-size:3rem;"></i>
+                                <h6 class="fw-bold text-muted">No Accounts Found</h6>
+                                <p class="text-muted small">No client ledger accounts are currently registered. Use the panel on the left to initialize one.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+</th:block>
+</div>
+</body>
+</html>

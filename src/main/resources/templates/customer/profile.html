@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{common/layout :: head-resources}">
+</head>
+<body>
+<div th:replace="~{common/layout :: layout(~{::content}, 'My Profile')}">
+<th:block th:fragment="content">
+<div class="row g-4" th:if="${customer != null}">
+    <!-- Profile General Card -->
+    <div class="col-lg-4">
+        <div class="form-card text-center">
+            <div style="width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;margin:0 auto 1.2rem;font-size:2.2rem;font-weight:800;color:#fff;" th:text="${#strings.substring(customer.fullName,0,1).toUpperCase()}"></div>
+            <h5 style="font-weight:800;" th:text="${customer.fullName}"></h5>
+            <p style="color:var(--text-muted);font-size:.85rem; margin-bottom:1rem;" th:text="${customer.email}"></p>
+            
+            <div class="mb-3">
+                <span class="badge-status badge-verified" th:if="${customer.kycStatus.name() == 'VERIFIED'}">KYC Verified</span>
+                <span class="badge-status badge-pending" th:if="${customer.kycStatus.name() == 'PENDING'}">KYC Pending</span>
+                <span class="badge-status badge-rejected" th:if="${customer.kycStatus.name() == 'REJECTED'}">KYC Rejected</span>
+            </div>
+            
+            <hr class="my-3" style="border-color: var(--border-color);"/>
+            
+            <div style="text-align:left;font-size:.85rem;">
+                <div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid var(--border-color);"><span style="color:var(--text-muted); font-weight:700;">Customer ID</span><strong th:text="${customer.customerId}"></strong></div>
+                <div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid var(--border-color);"><span style="color:var(--text-muted); font-weight:700;">Mobile</span><strong th:text="${customer.mobileNumber}"></strong></div>
+                <div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid var(--border-color);"><span style="color:var(--text-muted); font-weight:700;">Gender</span><strong th:text="${customer.gender}"></strong></div>
+                <div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid var(--border-color);"><span style="color:var(--text-muted); font-weight:700;">DOB</span><strong th:text="${customer.dateOfBirth != null ? #temporals.format(customer.dateOfBirth,'dd MMM yyyy') : '-'}"></strong></div>
+                <div style="display:flex;justify-content:space-between;padding:.5rem 0;"><span style="color:var(--text-muted); font-weight:700;">Member Since</span><strong th:text="${#temporals.format(customer.createdAt,'MMM yyyy')}"></strong></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Customer 360 Detailed Info -->
+    <div class="col-lg-8">
+        <div class="form-card mb-4">
+            <h6 style="font-weight:700;margin-bottom:1.5rem;"><i class="fas fa-id-card me-2 text-primary"></i>Customer 360° Verification Matrix</h6>
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="fw-bold text-muted" style="font-size:.72rem;text-transform:uppercase;letter-spacing:1px;">PAN Card Number</div>
+                    <div style="font-size:.9rem;margin-top:.25rem; font-weight:700;" th:text="${customer.panNumber ?: 'Not provided'}"></div>
+                </div>
+                <div class="col-md-6">
+                    <div class="fw-bold text-muted" style="font-size:.72rem;text-transform:uppercase;letter-spacing:1px;">Aadhaar UIDAI</div>
+                    <div style="font-size:.9rem;margin-top:.25rem; font-weight:700;" th:text="${customer.aadhaarNumber != null ? #strings.substring(customer.aadhaarNumber,0,4) + ' **** ' + #strings.substring(customer.aadhaarNumber,8) : 'Not provided'}"></div>
+                </div>
+                <div class="col-12">
+                    <div class="fw-bold text-muted" style="font-size:.72rem;text-transform:uppercase;letter-spacing:1px;">Residential Address</div>
+                    <div style="font-size:.9rem;margin-top:.25rem; font-weight:700;" th:text="${customer.address + ', ' + customer.city + ', ' + customer.state + ' - ' + customer.pincode}"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Simulated Credit Score -->
+            <div class="col-md-6">
+                <div class="form-card h-100">
+                    <h6 class="fw-bold mb-3" style="font-size:0.85rem;"><i class="fas fa-gauge-high text-success me-2"></i>Credit Score Metrics</h6>
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h2 class="fw-extrabold text-success mb-0" style="font-size:2.2rem; font-weight:800;">785</h2>
+                            <span style="font-size:0.7rem; color:var(--success); font-weight:700;">EXCELLENT SCORE</span>
+                        </div>
+                        <i class="fas fa-shield-halved text-success opacity-25" style="font-size:3rem;"></i>
+                    </div>
+                </div>
+            </div>
+            <!-- Relationship Manager -->
+            <div class="col-md-6">
+                <div class="form-card h-100">
+                    <h6 class="fw-bold mb-3" style="font-size:0.85rem;"><i class="fas fa-user-tie text-primary me-2"></i>Relationship Manager</h6>
+                    <div class="d-flex align-items-center gap-3">
+                        <div style="width:42px; height:42px; border-radius:50%; background:var(--primary-glow); color:var(--primary); display:flex; align-items:center; justify-content:center; font-weight:800;" th:text="${customer.user.username != null ? #strings.substring(customer.user.username,0,1).toUpperCase() : 'M'}">M</div>
+                        <div>
+                            <h6 class="mb-0 fw-bold" style="font-size:0.85rem;" th:text="${customer.city + ' Premium Desk'}">Local Premium Desk</h6>
+                            <span class="text-muted small" style="font-size:0.75rem;">Premium Services Hub</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</th:block>
+</div>
+</body>
+</html>

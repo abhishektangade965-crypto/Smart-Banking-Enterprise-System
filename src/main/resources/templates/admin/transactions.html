@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{common/layout :: head-resources}">
+</head>
+<body>
+<div th:replace="~{common/layout :: layout(~{::content}, 'Transaction Management')}">
+<th:block th:fragment="content">
+<div class="data-table-card">
+    <div class="card-header-custom">
+        <h6><i class="fas fa-exchange-alt me-2 text-primary"></i>All Transactions</h6>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead><tr><th>Txn ID</th><th>From</th><th>To</th><th>Type</th><th>Amount</th><th>Status</th><th>Date</th><th>Remarks</th></tr></thead>
+            <tbody>
+            <tr th:each="t : ${transactions}">
+                <td><code style="font-size:.75rem;" th:text="${t.transactionId}"></code></td>
+                <td style="font-size:.8rem;" th:text="${t.senderAccount != null ? t.senderAccount.accountNumber : '-'}"></td>
+                <td style="font-size:.8rem;" th:text="${t.receiverAccount != null ? t.receiverAccount.accountNumber : '-'}"></td>
+                <td><span style="font-size:.75rem;background:#dbeafe;color:#1e40af;padding:.2rem .6rem;border-radius:6px;font-weight:600;" th:text="${t.transactionType}"></span></td>
+                <td class="fw-600">&#x20B9;<span th:text="${#numbers.formatDecimal(t.amount, 0, 'COMMA', 2, 'POINT')}"></span></td>
+                <td>
+                    <span class="badge-status badge-active" th:if="${t.status.name() == 'SUCCESS'}">Success</span>
+                    <span class="badge-status badge-pending" th:if="${t.status.name() == 'PENDING'}">Pending</span>
+                    <span class="badge-status badge-rejected" th:if="${t.status.name() == 'FAILED'}">Failed</span>
+                </td>
+                <td style="font-size:.78rem;color:#64748b;" th:text="${#temporals.format(t.transactionDate,'dd MMM yyyy HH:mm')}"></td>
+                <td style="font-size:.8rem;" th:text="${t.remarks}"></td>
+            </tr>
+            <tr th:if="${transactions.empty}"><td colspan="8" class="text-center py-4 text-muted">No transactions found</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</th:block>
+</div>
+</body>
+</html>
