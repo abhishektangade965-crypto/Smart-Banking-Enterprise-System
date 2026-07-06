@@ -7,6 +7,10 @@
 
 SmartBank is a high-performance, robust, and enterprise-grade online banking application designed for modern businesses. Combining a Spring Boot 3.x backend with a premium **White Glassmorphism 2.0** frontend, the system provides separate portals for Administrators, Employees, and Customers, wrapped in a regulatory-compliant framework.
 
+> [!IMPORTANT]
+> ### 🎓 Hiring Managers & Architects
+> Read the complete **[Technical Case Study & Design Decisions (CASE_STUDY.md)](CASE_STUDY.md)** for a deep-dive on core design patterns (atomic ledger execution, deferred CSRF handling, database-level locking, and CSS tokens).
+
 ---
 
 ## 🏛️ System Architecture Overview
