@@ -12,6 +12,9 @@ SmartBank is a high-performance, robust, and enterprise-grade online banking app
 > Read the complete **[Technical Case Study & Design Decisions (CASE_STUDY.md)](CASE_STUDY.md)** for a deep-dive on core design patterns (atomic ledger execution, deferred CSRF handling, database-level locking, and CSS tokens).
 
 ---
+<img width="1365" height="680" alt="ezgif com-speed" src="https://github.com/user-attachments/assets/e8c46825-5e53-4778-b848-1f5a4262ad8f" />
+
+---
 
 ## 🏛️ System Architecture Overview
 
